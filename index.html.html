@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>舊振南 JZN | 一站式線上客製化送禮與卡片製作</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Noto Serif TC & Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            jzn: {
+              red: '#8C1C13',       // 經典舊振南朱紅
+              darkred: '#5C100A',   // 典雅深紅
+              gold: '#C6A15B',      // 質感暖金
+              lightgold: '#F4EAD3', // 淡金底色
+              cream: '#FDFBF7',     // 米白紙質感
+              text: '#2C2A29',      // 深黑灰字體
+            }
+          },
+          fontFamily: {
+            serif: ['"Noto Serif TC"', 'serif'],
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Noto Serif TC', serif;
+      background-color: #FDFBF7;
+      color: #2C2A29;
+    }
+
+    /* 隱藏滾動條但保持滾動 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* 模擬卡片紋理 */
+    .card-paper {
+      background-color: #FAF6EE;
+      background-image: radial-gradient(#E8DFD1 0.75px, transparent 0.75px);
+      background-size: 12px 12px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.03), 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 卡片風格預設 */
+    .card-style-classic {
+      border: 12px solid #8C1C13;
+      background-color: #FAF6EE;
+    }
+    .card-style-modern {
+      border: 3px double #C6A15B;
+      background-color: #FFFFFF;
+    }
+    .card-style-zgen {
+      border: 1px solid #2C2A29;
+      background-color: #FFF9F2;
+      box-shadow: 6px 6px 0px #8C1C13;
+    }
+    .card-style-gold {
+      border: 8px solid #C6A15B;
+      background-color: #5C100A;
+      color: #F4EAD3 !important;
+    }
+
+    /* 貼紙與印章視覺 */
+    .seal-stamp {
+      border: 2px solid #8C1C13;
+      color: #8C1C13;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      transform: rotate(-12deg);
+      opacity: 0.85;
+    }
+
+    /* Step tracker pulse animation */
+    @keyframes pulse-gold {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(198, 161, 91, 0.7); }
+      50% { box-shadow: 0 0 0 10px rgba(198, 161, 91, 0); }
+    }
+    .active-step-ring {
+      animation: pulse-gold 2s infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+  <!-- 頂部 Navigation Bar -->
+  <header class="bg-jzn-darkred text-white sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="goToStep(1)">
+        <div class="w-10 h-10 bg-jzn-gold rounded-full flex items-center justify-center font-black text-jzn-darkred text-xl tracking-wider shadow">
+          南
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-widest font-serif">舊振南 JZN</h1>
+          <p class="text-[10px] text-jzn-lightgold tracking-wider uppercase">Beyond Weddings • 每個小時刻，都值得厚禮數</p>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center space-x-6 text-sm text-jzn-lightgold">
+        <span class="flex items-center gap-1"><i class="fa-solid fa-gift text-jzn-gold"></i> 線上客製化送禮</span>
+        <span class="flex items-center gap-1"><i class="fa-solid fa-truck-fast text-jzn-gold"></i> 全台全程溫控直送</span>
+        <span class="flex items-center gap-1"><i class="fa-solid fa-stamp text-jzn-gold"></i> 實體卡片親印服務</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 核心內容區塊 -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+    <!-- 5步驟視覺進度條 (Step Tracker) -->
+    <div id="step-tracker-container" class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-amber-100 mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-jzn-red flex items-center gap-2">
+          <i class="fa-solid fa-diagram-next"></i> 線上客製送禮流程 (5大步驟)
+        </h2>
+        <span id="step-badge" class="px-3 py-1 bg-jzn-lightgold text-jzn-darkred text-xs font-bold rounded-full border border-jzn-gold">
+          步驟 1 / 5：線上選購禮盒
+        </span>
+      </div>
+
+      <!-- 步驟按鈕軌道 -->
+      <div class="relative flex items-center justify-between overflow-x-auto no-scrollbar py-2 max-w-4xl mx-auto">
+        <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 -z-0"></div>
+        <div id="progress-bar-fill" class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-jzn-gold transition-all duration-500 -z-0" style="width: 0%;"></div>
+
+        <!-- Step 1 -->
+        <button onclick="goToStep(1)" id="step-btn-1" class="step-btn relative z-10 flex flex-col items-center min-w-[75px] group">
+          <div class="w-10 h-10 rounded-full bg-jzn-red text-white flex items-center justify-center font-bold text-sm shadow active-step-ring transition-all">1</div>
+          <span class="text-xs font-medium mt-1 text-jzn-red font-bold">選購禮盒</span>
+        </button>
+        <!-- Step 2 -->
+        <button onclick="goToStep(2)" id="step-btn-2" class="step-btn relative z-10 flex flex-col items-center min-w-[75px] group">
+          <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm transition-all">2</div>
+          <span class="text-xs font-medium mt-1 text-gray-500">收禮資訊</span>
+        </button>
+        <!-- Step 3 -->
+        <button onclick="goToStep(3)" id="step-btn-3" class="step-btn relative z-10 flex flex-col items-center min-w-[75px] group">
+          <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm transition-all">3</div>
+          <span class="text-xs font-medium mt-1 text-gray-500">客製文字</span>
+        </button>
+        <!-- Step 4 -->
+        <button onclick="goToStep(4)" id="step-btn-4" class="step-btn relative z-10 flex flex-col items-center min-w-[75px] group">
+          <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm transition-all">4</div>
+          <span class="text-xs font-medium mt-1 text-gray-500">裝飾卡片</span>
+        </button>
+        <!-- Step 5 -->
+        <button onclick="goToStep(5)" id="step-btn-5" class="step-btn relative z-10 flex flex-col items-center min-w-[75px] group">
+          <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm transition-all">5</div>
+          <span class="text-xs font-medium mt-1 text-gray-500">結帳付款</span>
+        </button>
+      </div>
+    </div>
+
+
+    <!-- 步驟 1: 線上選購禮盒 -->
+    <div id="step-panel-1" class="step-panel space-y-6">
+      <div class="bg-gradient-to-r from-jzn-darkred to-jzn-red text-white p-6 rounded-2xl shadow-md flex justify-between items-center">
+        <div>
+          <h2 class="text-2xl font-bold font-serif mb-1"><i class="fa-solid fa-cookie-bite mr-2"></i>步驟 1：線上選購禮盒</h2>
+          <p class="text-sm text-jzn-lightgold">挑選適合日常微慶祝或節慶祝福的舊振南質感漢餅，精緻單人享用或親友分享皆宜。</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- 產品 1 -->
+        <div class="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <div class="relative bg-amber-50 h-48 flex items-center justify-center p-4">
+              <span class="absolute top-3 left-3 bg-jzn-gold text-jzn-darkred text-xs px-2.5 py-1 rounded-full font-bold">Z世代熱銷</span>
+              <img src="https://placehold.co/400x300/8C1C13/FFF?text=微型漢餅一口酥" alt="一口酥禮盒" class="max-h-full rounded-lg object-cover shadow">
+            </div>
+            <div class="p-5">
+              <h3 class="font-bold text-lg text-jzn-text">微型漢餅一口酥禮盒</h3>
+              <p class="text-xs text-stone-500 mt-1 mb-3">少糖低負擔、一口大小的專屬微型設計，完美滿足個人日常犒賞與微慶祝。</p>
+              <div class="flex items-center justify-between">
+                <span class="text-jzn-red font-bold text-xl">NT$ 520</span>
+                <span class="text-xs text-stone-400">8入/盒 (綜合風味)</span>
+              </div>
+            </div>
+          </div>
+          <div class="p-5 pt-0">
+            <button onclick="selectProduct('微型漢餅一口酥禮盒', 520)" class="w-full py-2.5 bg-jzn-red hover:bg-jzn-darkred text-white rounded-xl font-bold transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-cart-plus"></i> 選擇此禮盒
+            </button>
+          </div>
+        </div>
+
+        <!-- 產品 2 -->
+        <div class="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <div class="relative bg-amber-50 h-48 flex items-center justify-center p-4">
+              <span class="absolute top-3 left-3 bg-jzn-red text-white text-xs px-2.5 py-1 rounded-full font-bold">百年招牌</span>
+              <img src="https://placehold.co/400x300/C6A15B/2C2A29?text=經典綠豆椪禮盒" alt="綠豆椪禮盒" class="max-h-full rounded-lg object-cover shadow">
+            </div>
+            <div class="p-5">
+              <h3 class="font-bold text-lg text-jzn-text">經典綠豆椪質感禮盒</h3>
+              <p class="text-xs text-stone-500 mt-1 mb-3">傳承百年手工綠豆沙餡，皮薄餡豐，綿密細緻，傳承世代溫暖情意。</p>
+              <div class="flex items-center justify-between">
+                <span class="text-jzn-red font-bold text-xl">NT$ 680</span>
+                <span class="text-xs text-stone-400">6入/盒 (李白/蘇東坡)</span>
+              </div>
+            </div>
+          </div>
+          <div class="p-5 pt-0">
+            <button onclick="selectProduct('經典綠豆椪質感禮盒', 680)" class="w-full py-2.5 bg-stone-800 hover:bg-black text-white rounded-xl font-bold transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-cart-plus"></i> 選擇此禮盒
+            </button>
+          </div>
+        </div>
+
+        <!-- 產品 3 -->
+        <div class="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <div class="relative bg-amber-50 h-48 flex items-center justify-center p-4">
+              <span class="absolute top-3 left-3 bg-amber-600 text-white text-xs px-2.5 py-1 rounded-full font-bold">金賞鳳梨</span>
+              <img src="https://placehold.co/400x300/FAF6EE/8C1C13?text=經典鳳梨酥禮盒" alt="鳳梨酥禮盒" class="max-h-full rounded-lg object-cover shadow">
+            </div>
+            <div class="p-5">
+              <h3 class="font-bold text-lg text-jzn-text">經典鳳梨酥質感禮盒</h3>
+              <p class="text-xs text-stone-500 mt-1 mb-3">嚴選關廟鳳梨內餡與濃郁奶香餅皮，象徵「旺來」最真誠的日常祝福。</p>
+              <div class="flex items-center justify-between">
+                <span class="text-jzn-red font-bold text-xl">NT$ 600</span>
+                <span class="text-xs text-stone-400">12入/精裝盒</span>
+              </div>
+            </div>
+          </div>
+          <div class="p-5 pt-0">
+            <button onclick="selectProduct('經典鳳梨酥質感禮盒', 600)" class="w-full py-2.5 bg-stone-800 hover:bg-black text-white rounded-xl font-bold transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-cart-plus"></i> 選擇此禮盒
+            </button>
+          </div>
+        </div>
+
+        <!-- 產品 4 -->
+        <div class="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <div class="relative bg-amber-50 h-48 flex items-center justify-center p-4">
+              <span class="absolute top-3 left-3 bg-emerald-700 text-white text-xs px-2.5 py-1 rounded-full font-bold">節慶限定</span>
+              <img src="https://placehold.co/400x300/5C100A/FFF?text=小時刻喜餅組" alt="小時刻喜餅" class="max-h-full rounded-lg object-cover shadow">
+            </div>
+            <div class="p-5">
+              <h3 class="font-bold text-lg text-jzn-text">「小時刻」綜合體驗喜餅</h3>
+              <p class="text-xs text-stone-500 mt-1 mb-3">專為日常微慶祝設計的雙層綜合禮盒，將漢餅昇華為美學生活儀式。</p>
+              <div class="flex items-center justify-between">
+                <span class="text-jzn-red font-bold text-xl">NT$ 880</span>
+                <span class="text-xs text-stone-400">綜合漢餅+高山茶禮</span>
+              </div>
+            </div>
+          </div>
+          <div class="p-5 pt-0">
+            <button onclick="selectProduct('「小時刻」綜合體驗喜餅', 880)" class="w-full py-2.5 bg-stone-800 hover:bg-black text-white rounded-xl font-bold transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-cart-plus"></i> 選擇此禮盒
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 步驟 2: 填寫收禮人資訊 -->
+    <div id="step-panel-2" class="step-panel hidden space-y-6">
+      <div class="bg-gradient-to-r from-jzn-darkred to-jzn-red text-white p-6 rounded-2xl shadow-md">
+        <h2 class="text-2xl font-bold font-serif mb-1"><i class="fa-solid fa-address-book mr-2"></i>步驟 2：填寫收禮人資訊</h2>
+        <p class="text-sm text-jzn-lightgold">輸入收禮好友或親人的配送資料，我們將為您全程溫控包裝直送。</p>
+      </div>
+
+      <div class="bg-white p-6 sm:p-8 rounded-2xl border border-stone-200 shadow-sm max-w-3xl mx-auto space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-bold text-jzn-text mb-2"><i class="fa-solid fa-user text-jzn-gold"></i> 收禮人姓名 *</label>
+            <input type="text" id="recipient-name" value="陳小榛" placeholder="例如：張小明" class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-jzn-gold focus:border-jzn-gold outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-jzn-text mb-2"><i class="fa-solid fa-phone text-jzn-gold"></i> 聯絡電話 *</label>
+            <input type="text" id="recipient-phone" value="0912-345-678" placeholder="09XX-XXX-XXX" class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-jzn-gold focus:border-jzn-gold outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-jzn-text mb-2"><i class="fa-solid fa-location-dot text-jzn-gold"></i> 配送地址 *</label>
+          <input type="text" id="recipient-address" value="新竹縣新埔鎮文山路100號" placeholder="請輸入完整的收件地址" class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-jzn-gold focus:border-jzn-gold outline-none">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-bold text-jzn-text mb-2"><i class="fa-solid fa-calendar-day text-jzn-gold"></i> 希望送達日期</label>
+            <input type="date" id="delivery-date" value="2026-10-28" class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-jzn-gold focus:border-jzn-gold outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-jzn-text mb-2"><i class="fa-solid fa-clock text-jzn-gold"></i> 送達時段</label>
+            <select id="delivery-time" class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-jzn-gold focus:border-jzn-gold outline-none bg-white">
+              <option>不指定時段</option>
+              <option selected>13:00 前 (上午)</option>
+              <option>14:00 - 18:00 (下午)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center pt-4 border-t border-stone-200">
+          <button onclick="goToStep(1)" class="px-6 py-2.5 border border-stone-300 rounded-xl font-bold text-stone-600 hover:bg-stone-50">
+            <i class="fa-solid fa-arrow-left"></i> 上一步
+          </button>
+          <button onclick="saveStep2AndNext()" class="px-8 py-3 bg-jzn-red hover:bg-jzn-darkred text-white font-bold rounded-xl shadow-md transition">
+            儲存並繼續客製卡片 <i class="fa-solid fa-arrow-right ml-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 步驟 3: 客製化文字 (卡片編輯器) -->
+    <div id="step-panel-3" class="step-panel hidden space-y-6">
+      <div class="bg-gradient-to-r from-jzn-darkred to-jzn-red text-white p-6 rounded-2xl shadow-md">
+        <h2 class="text-2xl font-bold font-serif mb-1"><i class="fa-solid fa-pen-nib mr-2"></i>步驟 3：客製化祝福文字</h2>
+        <p class="text-sm text-jzn-lightgold">輸入您想對朋友說的話，可選擇打字字體或模擬手寫質感，為禮盒注入獨一無二的情感重量。</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- 控制面板 -->
+        <div class="lg:col-span-6 bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-6">
+          <div class="flex border-b border-stone-200 pb-3 gap-4">
+            <button id="tab-type-btn" onclick="switchInputMode('type')" class="font-bold text-jzn-red border-b-2 border-jzn-red pb-2 flex items-center gap-2">
+              <i class="fa-solid fa-keyboard"></i> 打字輸入文字
+            </button>
+            <button id="tab-handwrite-btn" onclick="switchInputMode('handwrite')" class="font-bold text-stone-400 pb-2 flex items-center gap-2 hover:text-stone-600">
+              <i class="fa-solid fa-signature"></i> 模擬手寫簽名/上傳
+            </button>
+          </div>
+
+          <!-- 打字模式 -->
+          <div id="input-type-mode" class="space-y-4">
+            <div>
+              <label class="block text-sm font-bold text-jzn-text mb-2">稱謂 / 開頭</label>
+              <input type="text" id="card-salutation" value="親愛的 小榛：" oninput="updateCardPreview()" class="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-jzn-gold outline-none">
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-jzn-text mb-2">祝福內文 (最多 150 字)</label>
+              <textarea id="card-message" rows="5" oninput="updateCardPreview()" class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-jzn-gold outline-none">恭喜你解鎖人生新里程碑！在這個值得歡慶的小時刻，送上舊振南的漢餅心意，希望你喜歡這份『厚禮數』的溫暖。辛苦了，繼續閃閃發光吧！</textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-jzn-text mb-2">署名 / 落款</label>
+              <input type="text" id="card-signature" value="愛你的 宸鈺 筆" oninput="updateCardPreview()" class="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-jzn-gold outline-none">
+            </div>
+
+            <div class="pt-2">
+              <label class="block text-sm font-bold text-jzn-text mb-2">快速引用常用語</label>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="applyTemplate('exam')" class="px-3 py-1 bg-amber-50 hover:bg-amber-100 text-jzn-darkred text-xs rounded-lg border border-amber-200">期末歐過祝福</button>
+                <button onclick="applyTemplate('job')" class="px-3 py-1 bg-amber-50 hover:bg-amber-100 text-jzn-darkred text-xs rounded-lg border border-amber-200">轉職晉升誌慶</button>
+                <button onclick="applyTemplate('bday')" class="px-3 py-1 bg-amber-50 hover:bg-amber-100 text-jzn-darkred text-xs rounded-lg border border-amber-200">生日快樂禮數</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 手寫模式 -->
+          <div id="input-handwrite-mode" class="hidden space-y-4">
+            <p class="text-xs text-stone-500">在下方手繪板簽名或寫下短句，我們會將您的筆跡印製在實體卡片上：</p>
+            <div class="border-2 border-dashed border-stone-300 rounded-xl bg-amber-50/50 p-2 text-center">
+              <canvas id="handwrite-canvas" width="350" height="150" class="mx-auto bg-white rounded-lg shadow-inner cursor-crosshair"></canvas>
+              <div class="flex justify-center gap-3 mt-2">
+                <button onclick="clearCanvas()" class="text-xs px-3 py-1 bg-stone-200 hover:bg-stone-300 rounded text-stone-700">清除重新手寫</button>
+                <button onclick="applyHandwriting()" class="text-xs px-3 py-1 bg-jzn-gold text-jzn-darkred font-bold rounded">套用到卡片預覽</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center pt-4 border-t border-stone-200">
+            <button onclick="goToStep(2)" class="px-6 py-2.5 border border-stone-300 rounded-xl font-bold text-stone-600 hover:bg-stone-50">
+              <i class="fa-solid fa-arrow-left"></i> 上一步
+            </button>
+            <button onclick="goToStep(4)" class="px-8 py-3 bg-jzn-red hover:bg-jzn-darkred text-white font-bold rounded-xl shadow-md transition">
+              下一步：裝飾卡片風格 <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 實時卡片預覽區 (Live Canvas) -->
+        <div class="lg:col-span-6 sticky top-24">
+          <div class="bg-stone-800 text-white p-4 rounded-t-2xl flex justify-between items-center">
+            <span class="text-xs font-bold tracking-widest uppercase text-jzn-gold"><i class="fa-solid fa-eye"></i> 實體卡片親印預覽 (Front Side)</span>
+            <span class="text-[10px] bg-stone-700 px-2 py-0.5 rounded text-stone-300">1:1 精緻複製</span>
+          </div>
+          
+          <div id="card-preview-container" class="card-paper p-8 min-h-[380px] rounded-b-2xl card-style-classic relative flex flex-col justify-between transition-all duration-300">
+            <!-- 品牌印記 -->
+            <div class="flex justify-between items-start">
+              <div class="text-xs tracking-widest text-jzn-darkred font-bold border-b border-jzn-gold pb-1">
+                舊振南 JZN • 厚禮數
+              </div>
+              <div id="preview-stamp" class="seal-stamp w-12 h-12 text-xs">
+                百年<br>奉茶
+              </div>
+            </div>
+
+            <!-- 卡片內文 -->
+            <div class="my-6 space-y-4">
+              <h4 id="preview-salutation" class="font-bold text-lg text-jzn-darkred">親愛的 小榛：</h4>
+              <p id="preview-message" class="text-sm leading-relaxed text-stone-800 font-serif whitespace-pre-wrap">恭喜你解鎖人生新里程碑！在這個值得歡慶的小時刻，送上舊振南的漢餅心意，希望你喜歡這份『厚禮數』的溫暖。辛苦了，繼續閃閃發光吧！</p>
+              <div id="preview-handwrite-img" class="hidden my-2">
+                <img id="handwrite-img-element" src="" class="max-h-16 opacity-90" alt="手寫簽名">
+              </div>
+              <p id="preview-signature" class="text-right text-sm font-bold text-jzn-darkred">愛你的 宸鈺 筆</p>
+            </div>
+
+            <!-- 底部裝飾與小字 -->
+            <div class="text-center border-t border-stone-300/60 pt-3 flex justify-between items-center text-[10px] text-stone-500">
+              <span>Beyond Weddings • 每個小時刻，都值得厚禮數</span>
+              <!-- 移除「風格：...」標籤 -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 步驟 4: 裝飾卡片風格 -->
+    <div id="step-panel-4" class="step-panel hidden space-y-6">
+      <div class="bg-gradient-to-r from-jzn-darkred to-jzn-red text-white p-6 rounded-2xl shadow-md">
+        <h2 class="text-2xl font-bold font-serif mb-1"><i class="fa-solid fa-palette mr-2"></i>步驟 4：裝飾卡片風格與圖章</h2>
+        <p class="text-sm text-jzn-lightgold">選擇展現個人品味的卡片材質風格，並蓋上舊振南專屬的「厚禮數」紀念圖章。</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- 樣式與圖章選擇器 -->
+        <div class="lg:col-span-6 bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-6">
+          <div>
+            <label class="block text-sm font-bold text-jzn-text mb-3">1. 選擇卡片視覺風格</label>
+            <div class="grid grid-cols-2 gap-3">
+              <button onclick="setCardStyle('classic')" class="p-3 border-2 border-jzn-red bg-amber-50/50 rounded-xl text-left hover:border-jzn-red flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-sm text-jzn-darkred">典雅新中式</div>
+                  <div class="text-[11px] text-stone-500">經典朱紅外框與米黃紙質</div>
+                </div>
+                <div class="w-4 h-4 rounded-full bg-jzn-red"></div>
+              </button>
+
+              <button onclick="setCardStyle('modern')" class="p-3 border border-stone-300 rounded-xl text-left hover:border-jzn-gold flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-sm text-stone-800">溫暖文青風</div>
+                  <div class="text-[11px] text-stone-500">雙線金色邊框與潔白質感</div>
+                </div>
+                <div class="w-4 h-4 rounded-full bg-jzn-gold"></div>
+              </button>
+
+              <button onclick="setCardStyle('zgen')" class="p-3 border border-stone-300 rounded-xl text-left hover:border-jzn-gold flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-sm text-stone-800">Z世代潮流風</div>
+                  <div class="text-[11px] text-stone-500">立體陰影與俐落線條</div>
+                </div>
+                <div class="w-4 h-4 rounded-full bg-stone-800"></div>
+              </button>
+
+              <button onclick="setCardStyle('gold')" class="p-3 border border-stone-300 rounded-xl text-left hover:border-jzn-gold flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-sm text-stone-800">奢華黑金風</div>
+                  <div class="text-[11px] text-stone-500">深紅底色與金箔印花</div>
+                </div>
+                <div class="w-4 h-4 rounded-full bg-jzn-darkred"></div>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-jzn-text mb-3">2. 挑選專屬祝福印章 / 貼紙</label>
+            <div class="grid grid-cols-2 gap-3">
+              <button onclick="setStamp('厚禮數')" class="p-3 border-2 border-amber-600 bg-amber-50/40 rounded-xl text-center hover:bg-amber-50">
+                <div class="w-10 h-10 border-2 border-amber-600 text-amber-600 rounded-full flex items-center justify-center mx-auto font-bold text-xs">厚禮<br>數</div>
+                <span class="text-xs font-bold text-amber-900 mt-1 block">厚禮數章</span>
+              </button>
+
+              <button onclick="setStamp('小時刻')" class="p-3 border border-stone-200 rounded-xl text-center hover:bg-amber-50">
+                <div class="w-10 h-10 border-2 border-emerald-700 text-emerald-700 rounded-full flex items-center justify-center mx-auto font-bold text-xs">小<br>時刻</div>
+                <span class="text-xs text-stone-600 mt-1 block">小時刻慶</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center pt-4 border-t border-stone-200">
+            <button onclick="goToStep(3)" class="px-6 py-2.5 border border-stone-300 rounded-xl font-bold text-stone-600 hover:bg-stone-50">
+              <i class="fa-solid fa-arrow-left"></i> 上一步
+            </button>
+            <button onclick="goToStep(5)" class="px-8 py-3 bg-jzn-red hover:bg-jzn-darkred text-white font-bold rounded-xl shadow-md transition">
+              完成卡片，前往結帳 <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 預覽區同步 -->
+        <div class="lg:col-span-6 sticky top-24">
+          <div id="card-preview-clone-target"></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 步驟 5: 結帳付款 -->
+    <div id="step-panel-5" class="step-panel hidden space-y-6">
+      <div class="bg-gradient-to-r from-jzn-darkred to-jzn-red text-white p-6 rounded-2xl shadow-md">
+        <h2 class="text-2xl font-bold font-serif mb-1"><i class="fa-solid fa-credit-card mr-2"></i>步驟 5：完成訂單與結帳</h2>
+        <p class="text-sm text-jzn-lightgold">確認您的禮盒內容、卡片印刷樣式與收件資訊，進行安全付款。</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- 訂單明細與付款 -->
+        <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-6">
+          <h3 class="font-bold text-lg border-b border-stone-200 pb-3 flex justify-between items-center">
+            <span><i class="fa-solid fa-list-check text-jzn-gold"></i> 訂單摘要</span>
+            <span class="text-xs text-emerald-600 font-normal"><i class="fa-solid fa-shield-halved"></i> 安全加密結帳</span>
+          </h3>
+
+          <div class="space-y-4">
+            <div class="flex justify-between items-center py-2 border-b border-stone-100">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center font-bold text-jzn-red text-xl">餅</div>
+                <div>
+                  <div id="summary-product-name" class="font-bold text-jzn-text">微型漢餅一口酥禮盒</div>
+                  <div class="text-xs text-stone-500">含專屬精裝外盒與溫控配送</div>
+                </div>
+              </div>
+              <div id="summary-product-price" class="font-bold text-jzn-red">NT$ 520</div>
+            </div>
+
+            <div class="flex justify-between items-center py-2 border-b border-stone-100">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-jzn-lightgold rounded-lg flex items-center justify-center text-jzn-darkred"><i class="fa-solid fa-envelope-open-text text-xl"></i></div>
+                <div>
+                  <div class="font-bold text-jzn-text">舊振南客製實體親印卡片</div>
+                  <div class="text-xs text-stone-500">選用 300g 專屬棉柔質感卡紙</div>
+                </div>
+              </div>
+              <div class="font-bold text-emerald-600">附贈 (NT$ 0)</div>
+            </div>
+
+            <div class="flex justify-between items-center py-2 border-b border-stone-100">
+              <span class="text-stone-600">冷藏專車運費</span>
+              <span class="font-bold text-stone-800">NT$ 150</span>
+            </div>
+
+            <div class="flex justify-between items-center text-lg font-bold pt-2 text-jzn-darkred">
+              <span>總計應付金額</span>
+              <span id="summary-total-price" class="text-2xl text-jzn-red">NT$ 670</span>
+            </div>
+          </div>
+
+          <!-- 付款方式選擇 -->
+          <div class="pt-4 border-t border-stone-200">
+            <label class="block text-sm font-bold text-jzn-text mb-3">選擇付款方式</label>
+            <div class="grid grid-cols-3 gap-3">
+              <label class="p-3 border-2 border-jzn-red rounded-xl flex items-center justify-center gap-2 cursor-pointer bg-amber-50/30">
+                <input type="radio" name="pay" checked class="accent-jzn-red">
+                <span class="font-bold text-sm"><i class="fa-solid fa-credit-card"></i> 信用卡</span>
+              </label>
+              <label class="p-3 border border-stone-300 rounded-xl flex items-center justify-center gap-2 cursor-pointer hover:border-stone-400">
+                <input type="radio" name="pay" class="accent-jzn-red">
+                <span class="font-bold text-sm"><i class="fa-brands fa-line text-emerald-500"></i> LINE Pay</span>
+              </label>
+              <label class="p-3 border border-stone-300 rounded-xl flex items-center justify-center gap-2 cursor-pointer hover:border-stone-400">
+                <input type="radio" name="pay" class="accent-jzn-red">
+                <span class="font-bold text-sm"><i class="fa-brands fa-apple"></i> Apple Pay</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center pt-2">
+            <button onclick="goToStep(4)" class="px-6 py-2.5 border border-stone-300 rounded-xl font-bold text-stone-600 hover:bg-stone-50">
+              <i class="fa-solid fa-arrow-left"></i> 上一步
+            </button>
+            <button onclick="processPayment()" class="px-8 py-3.5 bg-jzn-red hover:bg-jzn-darkred text-white text-base font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-lock"></i> 確認付款，完成訂單
+            </button>
+          </div>
+        </div>
+
+        <!-- 配送摘要資訊 -->
+        <div class="lg:col-span-5 bg-stone-50 p-6 rounded-2xl border border-stone-200 space-y-4">
+          <h4 class="font-bold text-stone-800 border-b border-stone-200 pb-2"><i class="fa-solid fa-truck text-jzn-gold"></i> 配送資訊確認</h4>
+          <div class="text-sm space-y-2 text-stone-600">
+            <p><strong>收件人：</strong><span id="summary-recipient-name">陳小榛</span></p>
+            <p><strong>電話：</strong><span id="summary-recipient-phone">0912-345-678</span></p>
+            <p><strong>地址：</strong><span id="summary-recipient-address">新竹縣新埔鎮文山路100號</span></p>
+            <p><strong>預計送達：</strong><span id="summary-delivery-date">2026-10-28 13:00 前</span></p>
+          </div>
+
+          <div class="p-4 bg-white rounded-xl border border-amber-200/60 mt-4">
+            <div class="text-xs font-bold text-jzn-darkred mb-1"><i class="fa-solid fa-circle-info"></i> 店家服務承諾</div>
+            <p class="text-xs text-stone-500 leading-relaxed">完成付款後，系統將自動同步訂單至舊振南門市後台。我們將有專人親自為您印製實體質感卡片並組裝禮盒直送！</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 訂單完成 / 感謝頁面 (成功付款後顯示) -->
+    <div id="step-panel-success" class="step-panel hidden space-y-8 max-w-4xl mx-auto py-4">
+      <div class="bg-gradient-to-r from-jzn-gold via-amber-500 to-jzn-red text-white p-8 rounded-2xl shadow-xl text-center relative overflow-hidden">
+        <div class="w-20 h-20 bg-white text-emerald-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 shadow-lg">
+          <i class="fa-solid fa-check font-black"></i>
+        </div>
+        <h2 class="text-3xl font-bold font-serif mb-2">訂單完成！感謝您的訂購</h2>
+        <p class="text-jzn-lightgold text-sm max-w-lg mx-auto font-medium">舊振南已收到您的訂單與卡片設計，我們將以最隆重的「厚禮數」儀式感，為您親印卡片與新鮮製作包裝。</p>
+      </div>
+
+      <!-- 訂單詳細成果 Card -->
+      <div class="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-stone-200 pb-4 gap-2">
+          <div>
+            <div class="text-xs text-stone-400">訂單編號</div>
+            <div id="success-order-id" class="text-xl font-bold text-jzn-darkred font-mono">JZN-20261028-9852</div>
+          </div>
+          <div class="text-left sm:text-right">
+            <div class="text-xs text-stone-400">交易狀態</div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
+              <i class="fa-solid fa-circle text-[8px]"></i> 付款成功 (信用卡)
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          <!-- 左側：訂購細節 -->
+          <div class="space-y-4">
+            <h3 class="font-bold text-base text-jzn-text border-l-4 border-jzn-gold pl-3">配送與禮盒明細</h3>
+            
+            <div class="bg-stone-50 p-4 rounded-xl text-xs space-y-2.5 text-stone-700 border border-stone-200">
+              <p><strong>選購禮盒：</strong><span id="success-product-name" class="text-jzn-red font-bold">微型漢餅一口酥禮盒</span></p>
+              <p><strong>收件人姓名：</strong><span id="success-recipient-name">陳小榛</span></p>
+              <p><strong>聯絡電話：</strong><span id="success-recipient-phone">0912-345-678</span></p>
+              <p><strong>配送地址：</strong><span id="success-recipient-address">新竹縣新埔鎮文山路100號</span></p>
+              <p><strong>預計送達：</strong><span id="success-delivery-date" class="font-bold text-stone-800">2026-10-28 13:00 前</span></p>
+              <p><strong>總付款金額：</strong><span id="success-total-price" class="text-base font-bold text-jzn-red">NT$ 670</span></p>
+            </div>
+
+            <div class="p-4 bg-amber-50/60 rounded-xl border border-amber-200 text-xs text-jzn-darkred space-y-1">
+              <div class="font-bold"><i class="fa-solid fa-truck-ramp-box"></i> 後續服務流程</div>
+              <p class="text-stone-600 leading-relaxed">您製作的卡片將由舊振南專人印製並封入禮盒中，出貨時系統將傳送 SMS 簡訊及 Email 物流追蹤連結至您的手機。</p>
+            </div>
+          </div>
+
+          <!-- 右側：客製卡片實體預覽 -->
+          <div class="space-y-2">
+            <h3 class="font-bold text-base text-jzn-text border-l-4 border-jzn-gold pl-3">您設計的實體卡片縮圖</h3>
+            <div id="success-card-target" class="transform scale-90 sm:scale-100 origin-top shadow-md rounded-2xl overflow-hidden"></div>
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-stone-200 flex flex-col sm:flex-row justify-center gap-4">
+          <button onclick="goToStep(1)" class="px-8 py-3.5 bg-jzn-red hover:bg-jzn-darkred text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-rotate-right"></i> 再訂購一份禮盒
+          </button>
+          <button onclick="alert('感謝您的瀏覽與體驗！')" class="px-8 py-3.5 border border-stone-300 hover:bg-stone-50 text-stone-700 font-bold rounded-xl transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-house"></i> 返回舊振南首頁
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 頁尾 Footer -->
+  <footer class="bg-stone-900 text-stone-400 py-6 border-t border-stone-800 text-center text-xs">
+    <div class="max-w-7xl mx-auto px-4 space-y-2">
+      <p class="font-serif text-stone-300">舊振南餅店股份有限公司 JZN Bakery • 客製化送禮系統</p>
+      <p>Beyond Weddings • 每個小時刻，都值得厚禮數</p>
+    </div>
+  </footer>
+
+
+  <!-- JavaScript 邏輯控管 -->
+  <script>
+    // 全域狀態儲存
+    let selectedStep = 1;
+    let orderData = {
+      productName: '微型漢餅一口酥禮盒',
+      productPrice: 520,
+      recipientName: '陳小榛',
+      recipientPhone: '0912-345-678',
+      recipientAddress: '新竹縣新埔鎮文山路100號',
+      deliveryDate: '2026-10-30',
+      deliveryTime: '13:00 前 (上午)',
+      salutation: '親愛的 小榛：',
+      message: '恭喜你解鎖人生新里程碑！在這個值得歡慶的小時刻，送上舊振南的漢餅心意，希望你喜歡這份『厚禮數』的溫暖。辛苦了，繼續閃閃發光吧！',
+      signature: '愛你的 宸鈺 筆',
+      cardStyle: 'classic',
+      stampText: '厚禮數',
+      inputMode: 'type',
+      handwriteDataUrl: null,
+      orderId: ''
+    };
+
+    // 頁面載入完成初始化
+    window.onload = function() {
+      initCanvas();
+      updateCardPreview();
+      setStamp('厚禮數');
+      cloneCardToStep4();
+    };
+
+    // 切換 5 大步驟
+    function goToStep(stepNumber) {
+      selectedStep = stepNumber;
+
+      // 確保進度條顯示
+      document.getElementById('step-tracker-container').classList.remove('hidden');
+      document.getElementById('step-panel-success').classList.add('hidden');
+
+      // 更新 Step Badge & Progress Fill
+      document.getElementById('step-badge').innerText = `步驟 ${stepNumber} / 5：${getStepTitle(stepNumber)}`;
+      const percentage = ((stepNumber - 1) / 4) * 100;
+      document.getElementById('progress-bar-fill').style.width = percentage + '%';
+
+      // 切換按鈕高亮
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.getElementById(`step-btn-${i}`);
+        const circle = btn.querySelector('div');
+        const label = btn.querySelector('span');
+
+        if (i === stepNumber) {
+          circle.className = 'w-10 h-10 rounded-full bg-jzn-red text-white flex items-center justify-center font-bold text-sm shadow active-step-ring transition-all';
+          label.className = 'text-xs font-medium mt-1 text-jzn-red font-bold';
+        } else if (i < stepNumber) {
+          circle.className = 'w-10 h-10 rounded-full bg-jzn-gold text-jzn-darkred flex items-center justify-center font-bold text-sm transition-all';
+          label.className = 'text-xs font-medium mt-1 text-jzn-darkred';
+        } else {
+          circle.className = 'w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm transition-all';
+          label.className = 'text-xs font-medium mt-1 text-gray-500';
+        }
+      }
+
+      // 切換面板顯示
+      for (let i = 1; i <= 5; i++) {
+        const panel = document.getElementById(`step-panel-${i}`);
+        if (i === stepNumber) {
+          panel.classList.remove('hidden');
+        } else {
+          panel.classList.add('hidden');
+        }
+      }
+
+      // 步驟特殊觸發邏輯
+      if (stepNumber === 4) {
+        cloneCardToStep4();
+      } else if (stepNumber === 5) {
+        updateStep5Summary();
+      }
+
+      window.scrollTo({ top: 100, behavior: 'smooth' });
+    }
+
+    function getStepTitle(step) {
+      const titles = ['線上選購禮盒', '填寫收禮人資訊', '客製化文字', '裝飾卡片風格', '結帳付款'];
+      return titles[step - 1];
+    }
+
+    // 步驟 1：選擇產品
+    function selectProduct(name, price) {
+      orderData.productName = name;
+      orderData.productPrice = price;
+      goToStep(2);
+    }
+
+    // 步驟 2：儲存收件資訊
+    function saveStep2AndNext() {
+      orderData.recipientName = document.getElementById('recipient-name').value || '親愛的朋友';
+      orderData.recipientPhone = document.getElementById('recipient-phone').value || '0900-000-000';
+      orderData.recipientAddress = document.getElementById('recipient-address').value || '指定配送地址';
+      orderData.deliveryDate = document.getElementById('delivery-date').value || '2026-10-28';
+      orderData.deliveryTime = document.getElementById('delivery-time').value;
+      goToStep(3);
+    }
+
+    // 步驟 3：卡片文字更新
+    function updateCardPreview() {
+      orderData.salutation = document.getElementById('card-salutation').value;
+      orderData.message = document.getElementById('card-message').value;
+      orderData.signature = document.getElementById('card-signature').value;
+
+      document.getElementById('preview-salutation').innerText = orderData.salutation;
+      document.getElementById('preview-message').innerText = orderData.message;
+      document.getElementById('preview-signature').innerText = orderData.signature;
+    }
+
+    // 快速文案範本
+    function applyTemplate(type) {
+      if (type === 'exam') {
+        document.getElementById('card-salutation').value = '親愛的 戰友：';
+        document.getElementById('card-message').value = '歐過！期末考辛苦了！這個高光時刻值得好吃的漢餅與茶，讓我們一起享受甜甜的日常微慶祝！';
+        document.getElementById('card-signature').value = '陪你熬夜的 閨蜜 筆';
+      } else if (type === 'job') {
+        document.getElementById('card-salutation').value = 'Dear 夥伴：';
+        document.getElementById('card-message').value = '恭喜順利過試用期與晉升！你的努力大家有目共睹，送上舊振南的『厚禮數』，祝你未來的職場之路順風順水！';
+        document.getElementById('card-signature').value = '隊友們 共同獻上';
+      } else if (type === 'bday') {
+        document.getElementById('card-salutation').value = 'Happy Birthday! ';
+        document.getElementById('card-message').value = '生日快樂！在這個屬於你的特別日子，希望能用這份有溫度的中式漢餅禮盒，為你帶來滿滿的幸福感與質感儀式！';
+        document.getElementById('card-signature').value = '好友 敬上';
+      }
+      updateCardPreview();
+    }
+
+    // 切換打字/手寫模式
+    function switchInputMode(mode) {
+      orderData.inputMode = mode;
+      const typeBtn = document.getElementById('tab-type-btn');
+      const handwriteBtn = document.getElementById('tab-handwrite-btn');
+      const typeDiv = document.getElementById('input-type-mode');
+      const handwriteDiv = document.getElementById('input-handwrite-mode');
+
+      if (mode === 'type') {
+        typeBtn.className = 'font-bold text-jzn-red border-b-2 border-jzn-red pb-2 flex items-center gap-2';
+        handwriteBtn.className = 'font-bold text-stone-400 pb-2 flex items-center gap-2 hover:text-stone-600';
+        typeDiv.classList.remove('hidden');
+        handwriteDiv.classList.add('hidden');
+        document.getElementById('preview-handwrite-img').classList.add('hidden');
+      } else {
+        handwriteBtn.className = 'font-bold text-jzn-red border-b-2 border-jzn-red pb-2 flex items-center gap-2';
+        typeBtn.className = 'font-bold text-stone-400 pb-2 flex items-center gap-2 hover:text-stone-600';
+        handwriteDiv.classList.remove('hidden');
+        typeDiv.classList.add('hidden');
+      }
+    }
+
+    // 手寫板 Canvas 互動邏輯
+    let canvas, ctx, isDrawing = false;
+    function initCanvas() {
+      canvas = document.getElementById('handwrite-canvas');
+      if (!canvas) return;
+      ctx = canvas.getContext('2d');
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#8C1C13';
+
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseleave', stopDrawing);
+
+      // Touch 事件支援
+      canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        isDrawing = true;
+        ctx.beginPath();
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+      });
+      canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (!isDrawing) return;
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        ctx.stroke();
+      });
+      canvas.addEventListener('touchend', stopDrawing);
+    }
+
+    function startDrawing(e) {
+      isDrawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    }
+    function draw(e) {
+      if (!isDrawing) return;
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+    }
+    function stopDrawing() {
+      isDrawing = false;
+    }
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      document.getElementById('preview-handwrite-img').classList.add('hidden');
+    }
+    function applyHandwriting() {
+      const dataUrl = canvas.toDataURL();
+      orderData.handwriteDataUrl = dataUrl;
+      const imgElem = document.getElementById('handwrite-img-element');
+      imgElem.src = dataUrl;
+      document.getElementById('preview-handwrite-img').classList.remove('hidden');
+    }
+
+    // 步驟 4：卡片風格與圖章套用
+    function setCardStyle(style) {
+      orderData.cardStyle = style;
+      const preview = document.getElementById('card-preview-container');
+
+      // 重置 class
+      preview.className = 'card-paper p-8 min-h-[380px] rounded-b-2xl relative flex flex-col justify-between transition-all duration-300 ';
+
+      if (style === 'classic') {
+        preview.classList.add('card-style-classic');
+      } else if (style === 'modern') {
+        preview.classList.add('card-style-modern');
+      } else if (style === 'zgen') {
+        preview.classList.add('card-style-zgen');
+      } else if (style === 'gold') {
+        preview.classList.add('card-style-gold');
+      }
+      cloneCardToStep4();
+    }
+
+    function setStamp(text) {
+      orderData.stampText = text;
+      const stamp = document.getElementById('preview-stamp');
+      if (text === '厚禮數') {
+        stamp.innerHTML = '厚禮<br>數';
+        stamp.className = 'seal-stamp w-12 h-12 text-xs border-amber-600 text-amber-600';
+      } else if (text === '小時刻') {
+        stamp.innerHTML = '小<br>時刻';
+        stamp.className = 'seal-stamp w-12 h-12 text-xs border-emerald-700 text-emerald-700';
+      }
+      cloneCardToStep4();
+    }
+
+    function cloneCardToStep4() {
+      const target = document.getElementById('card-preview-clone-target');
+      if (target) {
+        target.innerHTML = document.getElementById('card-preview-container').outerHTML;
+      }
+    }
+
+    // 步驟 5：更新結帳頁資料
+    function updateStep5Summary() {
+      document.getElementById('summary-product-name').innerText = orderData.productName;
+      document.getElementById('summary-product-price').innerText = `NT$ ${orderData.productPrice}`;
+      document.getElementById('summary-total-price').innerText = `NT$ ${orderData.productPrice + 150}`;
+
+      document.getElementById('summary-recipient-name').innerText = orderData.recipientName;
+      document.getElementById('summary-recipient-phone').innerText = orderData.recipientPhone;
+      document.getElementById('summary-recipient-address').innerText = orderData.recipientAddress;
+      document.getElementById('summary-delivery-date').innerText = `${orderData.deliveryDate} ${orderData.deliveryTime}`;
+    }
+
+    // 確認付款完成訂單 -> 展示訂單成功頁面
+    function processPayment() {
+      // 隱藏進度條與第 5 步驟
+      document.getElementById('step-tracker-container').classList.add('hidden');
+      document.getElementById('step-panel-5').classList.add('hidden');
+
+      // 產生隨機訂單編號
+      const randomId = 'JZN-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('success-order-id').innerText = randomId;
+
+      // 填入成功頁資料
+      document.getElementById('success-product-name').innerText = orderData.productName;
+      document.getElementById('success-recipient-name').innerText = orderData.recipientName;
+      document.getElementById('success-recipient-phone').innerText = orderData.recipientPhone;
+      document.getElementById('success-recipient-address').innerText = orderData.recipientAddress;
+      document.getElementById('success-delivery-date').innerText = `${orderData.deliveryDate} ${orderData.deliveryTime}`;
+      document.getElementById('success-total-price').innerText = `NT$ ${orderData.productPrice + 150}`;
+
+      // 複製卡片縮圖
+      document.getElementById('success-card-target').innerHTML = document.getElementById('card-preview-container').outerHTML;
+
+      // 顯示成功頁面
+      document.getElementById('step-panel-success').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
